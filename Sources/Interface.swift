@@ -122,6 +122,7 @@ struct ShelfView: View {
             }
         }
         .onChange(of: reader.paperID) { _, id in selection = id; if reader.draft != nil { showAnnotations = true } }
+        .disabled(store.syncing)
         .onReceive(NotificationCenter.default.publisher(for: .shelfImport)) { _ in chooseImport() }
         .onReceive(NotificationCenter.default.publisher(for: .shelfSave)) { _ in _ = reader.save(); reader.rememberPage() }
         .onReceive(Timer.publish(every: 1, on: .main, in: .common).autoconnect()) { _ in reader.syncNativeAnnotations() }

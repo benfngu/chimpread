@@ -173,6 +173,7 @@ enum Importer {
 final class ShelfStore: ObservableObject {
     @Published private(set) var library = Library()
     @Published var importing = false
+    @Published var syncing = false
     @Published var error: String?
     @Published var report: String?
     let root: URL

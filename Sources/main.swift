@@ -11,6 +11,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSTo
     var migrationWindow: NSWindow?
     var bibliographyWindow: NSWindow?
     var browserTimer: Timer?
+    var cloud: CloudController!
+    var cloudWindow: NSWindow?
     func applicationDidFinishLaunching(_ notification: Notification) {
         if let iconName = Bundle.main.object(forInfoDictionaryKey: "CFBundleIconFile") as? String,
            let iconURL = Bundle.main.url(forResource: iconName, withExtension: "icns"),
@@ -22,6 +24,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSTo
             index + 1 < arguments.count ? URL(fileURLWithPath: arguments[index + 1], isDirectory: true) : nil
         }
         store = ShelfStore(root: root)
+        cloud = CloudController(store: store, reader: reader)
         store.refreshOrganization()
         organizationTimer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             MainActor.assumeIsolated { _ = self?.store.refreshOrganization() }
@@ -74,6 +77,14 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSTo
         else { reader.annotationUndo.redo() }
     }
     @objc func importFiles() { NotificationCenter.default.post(name: .shelfImport, object: nil) }
+    @objc func showCloud() {
+        if cloudWindow == nil {
+            let panel = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 538, height: 340), styleMask: [.titled, .closable], backing: .buffered, defer: false)
+            panel.title = "iCloud Sync"; panel.isReleasedWhenClosed = false
+            panel.contentView = NSHostingView(rootView: CloudSettings(cloud: cloud)); panel.center(); cloudWindow = panel
+        }
+        cloudWindow?.makeKeyAndOrderFront(nil)
+    }
     @objc func showIntegrations() {
         if integrationsWindow == nil {
             let panel = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 548, height: 380), styleMask: [.titled, .closable], backing: .buffered, defer: false)
@@ -129,7 +140,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate, NSTo
     @objc func showHelp() {
         let alert = NSAlert()
         alert.messageText = "Welcome to chimpread"
-        alert.informativeText = "Import PDFs with ⌘O or drop them into the paper list. Select text and choose Highlight (⌘L). Use Note (⌘N) for a margin comment; ⌘Return saves it.\n\nRight-click a paper to star it, mark it read, or edit its tags and collections. Click × in the reader to release the open PDF.\n\nFor Zotero: File → Migrate from Zotero imports Zotero RDF exports with files, notes, annotations, and collections. Use File → Bibliography (⌘B) for APA, Nature, BibTeX, or CSL-JSON. Chrome and Google Docs setup is in Integrations (⌘,).\n\nEverything stays in Application Support/PaperShelf. Back up that entire folder."
+        alert.informativeText = "Import PDFs with ⌘O or drop them into the paper list. Select text and choose Highlight (⌘L). Use Note (⌘N) for a margin comment; ⌘Return saves it.\n\nRight-click a paper to star it, mark it read, or edit its tags and collections. Click × in the reader to release the open PDF.\n\nFor Zotero: File → Migrate from Zotero imports Zotero RDF exports with files, notes, annotations, and collections. Use File → Bibliography (⌘B) for APA, Nature, BibTeX, or CSL-JSON. Chrome and Google Docs setup is in Integrations (⌘,).\n\nYour local library stays in Application Support/PaperShelf. Optional iCloud Drive sync is in the chimpread menu. Back up the local folder."
         alert.runModal()
     }
 }
@@ -141,6 +152,7 @@ func makeMenus(_ delegate: AppDelegate) {
     let about = appMenu.addItem(withTitle: "About chimpread", action: #selector(AppDelegate.showAbout), keyEquivalent: "")
     about.target = delegate
     let integrations = appMenu.addItem(withTitle: "Integrations…", action: #selector(AppDelegate.showIntegrations), keyEquivalent: ","); integrations.target = delegate
+    let sync = appMenu.addItem(withTitle: "iCloud Sync…", action: #selector(AppDelegate.showCloud), keyEquivalent: ""); sync.target = delegate
     appMenu.addItem(.separator())
     appMenu.addItem(withTitle: "Hide chimpread", action: #selector(NSApplication.hide(_:)), keyEquivalent: "h")
     appMenu.addItem(.separator())
@@ -191,7 +203,7 @@ if CommandLine.arguments.contains("--mcp") || CommandLine.arguments.contains("--
 }
 let app = NSApplication.shared
 if CommandLine.arguments.contains("--self-test") {
-    do { try runSelfTests(); try runConnectorTests(); exit(0) }
+    do { try runSelfTests(); try runConnectorTests(); try runCloudTests(); exit(0) }
     catch { fputs("FAIL: \(error)\n", stderr); exit(1) }
 }
 if CommandLine.arguments.contains("--memory-test") {

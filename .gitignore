@@ -17,3 +17,6 @@ __pycache__/
 library*.json
 mcp-access.json
 browser-access.json
+cloud-folder.bookmark
+cloud-state.json
+/website/.sites-*

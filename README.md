@@ -4,6 +4,14 @@ A minimal native macOS app for reading, annotating, organizing, and citing resea
 SwiftUI and AppKit provide the interface; PDFKit provides PDF reading and standard
 PDF annotations. No Electron, web server, required account, telemetry, or third-party app runtime. Citation formatting uses bundled JavaScript in macOS JavaScriptCore. Optional MCP access uses the same native executable over stdio.
 
+## Download
+
+Visit the [landing page](https://chimpread.peppydaisy.chatgpt.site) or download the
+[Apple Silicon installer](https://github.com/benfngu/chimpread/releases/latest).
+Open the DMG and drag chimpread into Applications. Requires macOS 14 or later.
+The early release is ad-hoc signed, **not Apple-notarized**. If macOS blocks it,
+review [Apple’s guidance](https://support.apple.com/102445) before approving the app.
+
 ## Use
 
 Open `chimpread.app`. Import PDFs or a Zotero RIS export with **File → Import Papers**
@@ -151,6 +159,31 @@ open -n build/chimpread.app --args --library /tmp/chimpread-demo
 Use one GUI instance per library. Back up your library before migration. The JSON
 index has stale-write protection but is not a transactional multi-process database.
 
+## iCloud Drive sync (experimental)
+
+Open **chimpread → iCloud Sync…** and choose a dedicated folder inside iCloud Drive.
+Choose that same folder on your other Mac (start with an empty chimpread library
+there to avoid independently imported reference IDs). Click **Sync Now** on each Mac.
+Your working library remains local; nothing is uploaded until you opt in.
+
+- Sync Now saves and closes the open paper. Automatic checks run every minute while
+  the reader is closed. A failed sync reports its reason and can be retried.
+- PDFs, embedded annotations, saved notes, tags, collection memberships, and reading
+  positions transfer. Drafts, MCP/Chrome permissions, and account settings stay local.
+- Immutable per-paper revisions and SHA-256 addressed PDFs avoid overwriting cloud
+  versions. Concurrent note text is retained; competing PDF versions become supporting
+  files. Other metadata conflicts use the latest synced revision (device clock order).
+- iCloud delivery is asynchronous. “Checked” means the local exchange finished, not
+  that Apple has delivered every file to your other Mac. Wait for Finder uploads.
+  Missing or corrupt remote PDFs pause the local merge. Retry when downloaded.
+- Sync retains cloud history and local replaced PDFs under `Sync Recovery`; storage
+  grows with edits. There is no automatic history pruning. Disconnect leaves both copies.
+- Collection names are unioned: old empty names may remain after a rename on another Mac.
+  Independently imported references with different IDs are not merged by this sync layer.
+- This first version is tested with local replicas, conflicts, and missing/corrupt delivery;
+  **real delivery between two iCloud devices remains unverified**. Back up your library.
+  No iOS/iPad app, CloudKit account service, or shared-library collaboration is included.
+
 ## MCP and Hermes
 
 Open **Integrations (⌘,)** and enable MCP access. PDF text and saved notes require
@@ -168,13 +201,13 @@ research rules and background schedules are not included in this repository.
 
 ## Status and limitations
 
-Version 0.3.0 is an early native application. Migration, bibliography formatting,
+Version 0.4.0 is an early native application. Migration, bibliography formatting,
 reader behavior, Chrome native messaging, and MCP have automated regression tests.
 Google Docs request construction is tested; live OAuth and document insertion still
 need verification with a configured account. The extension is distributed as unpacked
 source, not a Chrome Web Store release.
 
-No OCR, full-library text index, cloud sync, in-app LLM chat, or live citation fields.
+No OCR, full-library text index, in-app LLM chat, or live citation fields.
 Different scans/editions may remain separate despite byte-level deduplication.
 Bibliographies depend on the completeness of imported metadata. Only the current
 paper stays open; PDFKit can still use substantial memory for complex documents.
@@ -192,3 +225,10 @@ Copyright 2026 Ben Nguyen. Third-party components retain their own notices:
 
 The chimp reading icon adapts the Chimprace face with glasses and a book, created
 using OpenAI image generation at the author's request.
+
+## Releasing
+
+Run `./scripts/package-release.sh` to build and verify a DMG, ZIP, and SHA-256 checksums
+under `build/release/<version>/`. No signing credentials are bundled. Public distribution
+currently uses an ad-hoc signature; Developer ID signing and notarization remain future work.
+The static landing page lives in `website/dist/` and has no third-party runtime, fonts, or analytics.
