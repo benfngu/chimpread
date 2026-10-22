@@ -1,0 +1,22 @@
+{
+  "retrieved": "2026-10-22",
+  "citeproc_version": "2.4.63",
+  "files": {
+    "citeproc.js": {
+      "source": "https://registry.npmjs.org/citeproc/-/citeproc-2.4.63.tgz",
+      "sha256": "55abba1a8b8b48c14323fd053f9646013b4b7a0c977938064ecf5195a502b9f1"
+    },
+    "apa.csl": {
+      "source": "https://raw.githubusercontent.com/citation-style-language/styles/master/apa.csl",
+      "sha256": "3917def5fc951b104d64216c3373096042368b9704ba269ca83c14ebaba889fc"
+    },
+    "nature.csl": {
+      "source": "https://raw.githubusercontent.com/citation-style-language/styles/master/nature.csl",
+      "sha256": "15b1272a3c360168e0b51ab9257534b08ced67190ed57be7a1c32cea8fc87be8"
+    },
+    "locales-en-US.xml": {
+      "source": "https://raw.githubusercontent.com/citation-style-language/locales/master/locales-en-US.xml",
+      "sha256": "ac864c7c21166b4390d82c31792cdc509400727fa0060b43d8aa17e07f9cb079"
+    }
+  }
+}

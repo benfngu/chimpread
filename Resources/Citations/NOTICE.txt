@@ -1,0 +1,9 @@
+Citation processor: citeproc-js 2.4.63, Copyright (c) 2009–2019 Frank Bennett.
+https://github.com/Juris-M/citeproc-js
+Dual licensed CPAL 1.0 / AGPL 3.0 or later; license notices and AGPL text included.
+Unmodified source is included as citeproc.js.
+APA and Nature CSL styles: contributors named in their embedded info sections; CC BY-SA 3.0.
+en-US locale: Citation Style Language contributors; license notice embedded in XML.
+https://github.com/citation-style-language/styles
+https://github.com/citation-style-language/locales
+SHA-256 source provenance: PROVENANCE.json.
